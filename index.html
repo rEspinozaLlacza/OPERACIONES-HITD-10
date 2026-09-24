@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estudio — Avances y novedades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0B0F;
+    --bg-raised: #121319;
+    --line: #23252E;
+    --text: #E8E9ED;
+    --text-muted: #888B96;
+    --text-faint: #55575F;
+
+    --mc: #7FCB4A;
+    --mc-dim: #3A4A2C;
+    --gta: #C9A227;
+    --gta-dim: #4A3E1A;
+    --og: #3FD1E0;
+    --og-dim: #1C3B40;
+    --join: #E85FD1;
+    --join-dim: #4A2340;
+
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: inherit; margin: 0; padding: 0; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .display { font-family: 'Rajdhani', 'Work Sans', sans-serif; font-weight: 700; letter-spacing: 0.01em; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  a { color: inherit; }
+
+  /* custom cursor */
+  html, body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Ccircle cx='13' cy='13' r='9' fill='none' stroke='%23E8E9ED' stroke-width='1.5'/%3E%3Ccircle cx='13' cy='13' r='2' fill='%233FD1E0'/%3E%3C/svg%3E") 13 13, auto;
+  }
+  a, button {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg transform='rotate(-22 16 16)' stroke='%233FD1E0' stroke-width='2.2' stroke-linecap='round' fill='none'%3E%3Cline x1='16' y1='3' x2='16' y2='23'/%3E%3Cline x1='10' y1='21' x2='22' y2='21'/%3E%3Cline x1='16' y1='23' x2='16' y2='28'/%3E%3C/g%3E%3C/svg%3E") 6 6, pointer;
+  }
+
+  /* ---------- top nav (always visible, switches the whole interface below) ---------- */
+  header.nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px clamp(20px, 5vw, 56px);
+    padding-top: calc(18px + env(safe-area-inset-top, 0px));
+    background: rgba(10,11,15,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-brand {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text);
+    padding: 0;
+  }
+  .nav-brand .pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--mc);
+    display: inline-block;
+    box-shadow: 0 0 8px var(--mc);
+    animation: blink 2.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .nav-links { display: flex; gap: clamp(14px, 3vw, 28px); font-size: 0.88rem; color: var(--text-muted); }
+  .nav-links button {
+    background: none; border: none; font: inherit; color: inherit;
+    text-decoration: none; white-space: nowrap; padding: 0;
+  }
+  .nav-links button:hover { color: var(--text); }
+  .nav-links button.active { color: var(--text); }
+  .nav-links button[data-view="minecraft"].active { color: var(--mc); }
+  .nav-links button[data-view="gtav"].active { color: var(--gta); }
+  .nav-links button[data-view="original"].active { color: var(--og); }
+
+  /* ---------- views: only one shown at a time, whole interface swap ---------- */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    padding: clamp(64px, 12vh, 120px) clamp(20px, 5vw, 56px) clamp(48px, 8vh, 80px);
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 42px 42px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 20% 10%, black, transparent);
+            mask-image: radial-gradient(ellipse 70% 60% at 20% 10%, black, transparent);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; max-width: 760px; }
+  .hero-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--mc); margin-bottom: 18px; }
+  h1.hero-title { font-size: clamp(2.4rem, 7vw, 4.2rem); line-height: 1.02; max-width: 14ch; }
+  .hero-sub { margin-top: 22px; max-width: 46ch; color: var(--text-muted); font-size: 1.05rem; }
+  .hero-about { margin-top: 16px; max-width: 56ch; color: var(--text-muted); font-size: 0.98rem; }
+  .social-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+  .hero .glink .dot { background: var(--text-muted); }
+  .hero .glink:hover { border-color: var(--text); }
+
+  .hero-jump { display: flex; gap: 10px; margin-top: 36px; flex-wrap: wrap; }
+  .jump-chip {
+    text-decoration: none; font-size: 0.85rem; padding: 9px 16px;
+    border: 1px solid var(--line); border-radius: 3px; color: var(--text);
+    background: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .jump-chip[data-c="mc"]:hover { border-color: var(--mc); background: rgba(127,203,74,0.06); }
+  .jump-chip[data-c="gta"]:hover { border-color: var(--gta); background: rgba(201,162,39,0.06); }
+  .jump-chip[data-c="og"]:hover { border-color: var(--og); background: rgba(63,209,224,0.06); }
+
+  /* ---------- join / whitelist section ---------- */
+  .join {
+    padding: clamp(48px, 8vh, 88px) clamp(20px, 5vw, 56px);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    background-image: linear-gradient(180deg, rgba(232,95,209,0.045), transparent 220px);
+  }
+  .join .status { color: var(--join); border: 1px solid var(--join-dim); }
+  .join .glink:hover { border-color: var(--join); }
+  .join .glink .dot { background: var(--join); }
+  .join-note {
+    max-width: 980px; margin: 0 auto 28px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: var(--text-faint);
+  }
+
+  /* ---------- game view ---------- */
+  .game {
+    padding: clamp(48px, 8vh, 88px) clamp(20px, 5vw, 56px);
+    position: relative;
+    min-height: calc(100vh - 64px);
+  }
+  .game-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; max-width: 980px; margin: 0 auto 40px;
+    border-bottom: 1px solid var(--line); padding-bottom: 20px;
+  }
+  .game-head h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+  .game-head .status {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem;
+    padding: 5px 10px; border-radius: 3px; white-space: nowrap;
+  }
+  .game[data-c="mc"] .status { color: var(--mc); border: 1px solid var(--mc-dim); }
+  .game[data-c="gta"] .status { color: var(--gta); border: 1px solid var(--gta-dim); }
+  .game[data-c="og"] .status { color: var(--og); border: 1px solid var(--og-dim); }
+
+  .game-desc { max-width: 62ch; margin: 0 auto 40px; color: var(--text-muted); }
+
+  .log { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; }
+  .log-entry { display: grid; grid-template-columns: 92px 1fr; gap: 20px; padding: 20px 0; border-top: 1px solid var(--line); }
+  .log-entry:first-child { border-top: none; }
+  .log-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: var(--text-faint); padding-top: 3px; }
+  .log-body h3 { font-family: 'Work Sans', sans-serif; font-weight: 600; font-size: 1.02rem; margin-bottom: 6px; }
+  .log-body p { color: var(--text-muted); font-size: 0.94rem; max-width: 58ch; }
+  .game[data-c="mc"] .log-date { color: var(--mc); }
+  .game[data-c="gta"] .log-date { color: var(--gta); }
+  .game[data-c="og"] .log-date { color: var(--og); }
+
+  .game-links { max-width: 980px; margin: 32px auto 0; display: flex; gap: 10px; flex-wrap: wrap; }
+  .glink {
+    text-decoration: none; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 15px; border-radius: 3px; border: 1px solid var(--line); color: var(--text);
+    transition: transform 0.12s ease, border-color 0.15s ease;
+  }
+  .glink:hover { transform: translateY(-1px); }
+  .game[data-c="mc"] .glink:hover { border-color: var(--mc); }
+  .game[data-c="gta"] .glink:hover { border-color: var(--gta); }
+  .game[data-c="og"] .glink:hover { border-color: var(--og); }
+  .glink .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .game[data-c="mc"] .glink .dot { background: var(--mc); }
+  .game[data-c="gta"] .glink .dot { background: var(--gta); }
+  .game[data-c="og"] .glink .dot { background: var(--og); }
+
+  .game[data-c="mc"] { background-image: linear-gradient(180deg, rgba(127,203,74,0.045), transparent 260px); }
+  .game[data-c="gta"] { background-image: linear-gradient(180deg, rgba(201,162,39,0.045), transparent 260px); }
+  .game[data-c="og"] { background-image: linear-gradient(180deg, rgba(63,209,224,0.045), transparent 260px); }
+
+  .switch-row {
+    max-width: 980px; margin: 0 auto 32px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .switch-row button {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem;
+    padding: 7px 13px; border-radius: 3px; border: 1px solid var(--line);
+    background: none; color: var(--text-muted);
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .switch-row button:hover { color: var(--text); }
+
+  /* ---------- transition effects overlay ---------- */
+  .fx-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+    overflow: hidden;
+  }
+  .fx-cube {
+    position: absolute;
+    top: -30px;
+    width: 18px; height: 18px;
+    background: var(--mc);
+    border: 2px solid #4d7a2a;
+    box-shadow: inset -4px -4px 0 rgba(0,0,0,0.25);
+    opacity: 0;
+    animation: fxFall 1.3s ease-in forwards;
+  }
+  @keyframes fxFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    8% { opacity: 1; }
+    100% { transform: translateY(112vh) rotate(200deg); opacity: 0.9; }
+  }
+  .fx-car {
+    position: absolute;
+    top: 46%;
+    left: -160px;
+    opacity: 0;
+    animation: fxDrive 0.9s cubic-bezier(0.3,0,0.2,1) forwards;
+  }
+  @keyframes fxDrive {
+    0% { transform: translateX(0); opacity: 0; }
+    6% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateX(calc(100vw + 200px)); opacity: 0; }
+  }
+  .fx-leaf {
+    position: absolute;
+    top: -30px;
+    opacity: 0;
+    animation: fxDrift 2.4s ease-in-out forwards;
+  }
+  @keyframes fxDrift {
+    0% { transform: translate(0,0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.9; }
+    100% { transform: translate(var(--fx-dx,40px), 112vh) rotate(300deg); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fx-layer { display: none; }
+  }
+
+  /* ---------- footer ---------- */
+  footer {
+    padding: 40px clamp(20px, 5vw, 56px) calc(40px + env(safe-area-inset-bottom, 0px));
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+    color: var(--text-faint); font-size: 0.82rem;
+    border-top: 1px solid var(--line);
+  }
+  footer button { background: none; border: none; font: inherit; text-decoration: none; color: var(--text-muted); padding: 0; }
+  footer button:hover { color: var(--text); }
+
+  @media (max-width: 600px) {
+    .log-entry { grid-template-columns: 1fr; gap: 6px; }
+    .nav-links { font-size: 0.8rem; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="fx-layer" id="fx-layer"></div>
+
+<header class="nav">
+  <button class="nav-brand" data-view="home"><span class="pulse"></span>Operaciones HitD'10</button>
+  <nav class="nav-links">
+    <button data-view="home" class="active">Inicio</button>
+    <button data-view="minecraft">Minecraft</button>
+    <button data-view="gtav">GTA V</button>
+    <button data-view="original">Proyecto</button>
+  </nav>
+</header>
+
+<!-- ============ VIEW: HOME ============ -->
+<div class="view active" id="view-home">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-tag mono">BITÁCORA DE DESARROLLO</div>
+      <h1 class="display hero-title">Lo que estamos construyendo, en tiempo real.</h1>
+      <p class="hero-sub">Un solo lugar para seguir el avance de cada proyecto: mods, servidores y el juego propio que estamos desarrollando. Sin ruido, solo novedades.</p>
+
+      <p class="hero-about"><strong style="color:var(--text)">Quiénes somos:</strong> Somos un gran equipo creado por mí: una comunidad que desarrolla modificaciones para videojuegos, en especial Minecraft y GTA V, con servidores propios para poder jugar y crear juntos.</p>
+      <p class="hero-about"><strong style="color:var(--text)">Qué buscamos:</strong> Sumar personas que quieran apoyar el desarrollo de estos proyectos con lo que saben hacer — programación, modelado, diseño, ideas — y crecer juntos como comunidad.</p>
+
+      <div class="social-row">
+        <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Discord</a>
+        <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Twitch</a>
+        <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>YouTube</a>
+        <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>TikTok</a>
+        <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Kick</a>
+        <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>X (Twitter)</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="join" id="unete">
+    <div class="game-head">
+      <h2 class="display">Únete al equipo</h2>
+      <span class="status mono">WHITELIST ABIERTA</span>
+    </div>
+    <p class="game-desc">Estamos reclutando gente comprometida — no importa si tu nivel es básico o avanzado, lo que buscamos es pasión por estas ideas. Elige el área que más te interese.</p>
+    <p class="join-note">POR AHORA SOLO ESTAS MODIFICACIONES — CADA BOTÓN LLEVA A UNA WHITELIST DIFERENTE, SE ARMAN MÁS ADELANTE</p>
+
+    <div class="game-links">
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Desarrollador</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Diseñador 3D</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Diseñador 2D</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Editor de video</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Operaciones HitD'10</span>
+    <button data-view="unete-scroll">Únete al equipo ↓</button>
+  </footer>
+</div>
+
+<!-- ============ VIEW: MINECRAFT ============ -->
+<div class="view" id="view-minecraft">
+  <section class="game" data-c="mc">
+    <div class="switch-row">
+      <button data-view="home">← Inicio</button>
+      <button data-view="gtav">GTA V</button>
+      <button data-view="original">Proyecto</button>
+    </div>
+    <div class="game-head">
+      <h2 class="display">Minecraft</h2>
+      <span class="status mono">EN DESARROLLO</span>
+    </div>
+    <p class="game-desc">Estamos creando un servidor de Minecraft base (vanilla) con plugins, además de mods propios. Aquí se publican los avances a medida que van saliendo.</p>
+
+    <div class="log">
+      <div class="log-entry">
+        <div class="log-date">22 SEP</div>
+        <div class="log-body"><h3>Título del avance</h3><p>Describe aquí en una o dos líneas qué se agregó, cambió o mejoró.</p></div>
+      </div>
+      <div class="log-entry">
+        <div class="log-date">15 SEP</div>
+        <div class="log-body"><h3>Título del avance</h3><p>Describe aquí en una o dos líneas qué se agregó, cambió o mejoró.</p></div>
+      </div>
+    </div>
+
+    <div class="game-links">
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Discord</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>GitHub</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>IP del servidor</a>
+    </div>
+  </section>
+</div>
+
+<!-- ============ VIEW: GTA V ============ -->
+<div class="view" id="view-gtav">
+  <section class="game" data-c="gta">
+    <div class="switch-row">
+      <button data-view="home">← Inicio</button>
+      <button data-view="minecraft">Minecraft</button>
+      <button data-view="original">Proyecto</button>
+    </div>
+    <div class="game-head">
+      <h2 class="display">GTA V</h2>
+      <span class="status mono">EN DESARROLLO</span>
+    </div>
+    <p class="game-desc">Mods y servidor propio (FiveM/similar). Registro de avances y cambios recientes.</p>
+
+    <div class="log">
+      <div class="log-entry">
+        <div class="log-date">20 SEP</div>
+        <div class="log-body"><h3>Título del avance</h3><p>Describe aquí en una o dos líneas qué se agregó, cambió o mejoró.</p></div>
+      </div>
+      <div class="log-entry">
+        <div class="log-date">10 SEP</div>
+        <div class="log-body"><h3>Título del avance</h3><p>Describe aquí en una o dos líneas qué se agregó, cambió o mejoró.</p></div>
+      </div>
+    </div>
+
+    <div class="game-links">
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Discord</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>GitHub</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>IP del servidor</a>
+    </div>
+  </section>
+</div>
+
+<!-- ============ VIEW: PROYECTO ============ -->
+<div class="view" id="view-original">
+  <section class="game" data-c="og">
+    <div class="switch-row">
+      <button data-view="home">← Inicio</button>
+      <button data-view="minecraft">Minecraft</button>
+      <button data-view="gtav">GTA V</button>
+    </div>
+    <div class="game-head">
+      <h2 class="display">Proyecto</h2>
+      <span class="status mono">EN CONSTRUCCIÓN</span>
+    </div>
+    <p class="game-desc">El juego propio del estudio. Todavía sin nombre — el registro de avances empieza aquí.</p>
+
+    <div class="log">
+      <div class="log-entry">
+        <div class="log-date">POR VENIR</div>
+        <div class="log-body"><h3>Primer avance</h3><p>Cuando haya una primera novedad para mostrar, aparecerá aquí.</p></div>
+      </div>
+    </div>
+
+    <div class="game-links">
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>Discord</a>
+      <a class="glink" href="#" target="_blank" rel="noopener"><span class="dot"></span>GitHub</a>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var views = ['home', 'minecraft', 'gtav', 'original'];
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fxLayer = document.getElementById('fx-layer');
+  var fxDuration = { home: 0, minecraft: 1800, gtav: 950, original: 3200 };
+
+  function clearEl(el, delay) {
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, delay);
+  }
+
+  function spawnCubes() {
+    for (var i = 0; i < 10; i++) {
+      var cube = document.createElement('div');
+      cube.className = 'fx-cube';
+      cube.style.left = (Math.random() * 96) + 'vw';
+      cube.style.animationDelay = (Math.random() * 0.5) + 's';
+      cube.style.background = Math.random() > 0.5 ? 'var(--mc)' : '#8a6b3f';
+      fxLayer.appendChild(cube);
+      clearEl(cube, 2200);
+    }
+  }
+
+  function spawnCar() {
+    var car = document.createElement('div');
+    car.className = 'fx-car';
+    car.innerHTML = '<svg width="120" height="46" viewBox="0 0 120 46"><rect x="6" y="18" width="100" height="16" rx="4" fill="%23C9A227"/><path d="M22 18 L34 6 H86 L98 18 Z" fill="%23C9A227"/><rect x="40" y="9" width="34" height="9" rx="2" fill="%230A0B0F"/><circle cx="30" cy="36" r="8" fill="%230A0B0F"/><circle cx="90" cy="36" r="8" fill="%230A0B0F"/></svg>';
+    fxLayer.appendChild(car);
+    clearEl(car, 1000);
+  }
+
+  function spawnLeaves() {
+    for (var i = 0; i < 9; i++) {
+      var leaf = document.createElement('div');
+      leaf.className = 'fx-leaf';
+      leaf.style.left = (Math.random() * 96) + 'vw';
+      leaf.style.animationDelay = (Math.random() * 0.8) + 's';
+      leaf.style.setProperty('--fx-dx', (Math.random() * 160 - 80) + 'px');
+      var tint = Math.random() > 0.5 ? '%233FD1E0' : '%237FCB4A';
+      leaf.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 14 C2 6 6 2 14 2 C14 10 10 14 2 14 Z" fill="' + tint + '"/></svg>';
+      fxLayer.appendChild(leaf);
+      clearEl(leaf, 3000);
+    }
+  }
+
+  function activate(target, scrollToUnete) {
+    // nav highlight updates immediately so the click feels responsive
+    document.querySelectorAll('[data-view]').forEach(function (el) {
+      if (views.indexOf(el.getAttribute('data-view')) !== -1) {
+        el.classList.toggle('active', el.getAttribute('data-view') === target);
+      }
+    });
+
+    // hide all views now; the effect plays over a blank screen
+    views.forEach(function (id) {
+      var el = document.getElementById('view-' + id);
+      if (el) el.classList.remove('active');
+    });
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+
+    if (!reduceMotion) {
+      if (target === 'minecraft') spawnCubes();
+      if (target === 'gtav') spawnCar();
+      if (target === 'original') spawnLeaves();
+    }
+
+    var delay = reduceMotion ? 0 : (fxDuration[target] || 0);
+    setTimeout(function () {
+      var el = document.getElementById('view-' + target);
+      if (el) el.classList.add('active');
+      if (scrollToUnete) {
+        document.getElementById('unete').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, delay);
+  }
+
+  document.querySelectorAll('[data-view]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var target = el.getAttribute('data-view');
+      if (target === 'unete-scroll') {
+        activate('home', true);
+      } else {
+        activate(target, false);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
